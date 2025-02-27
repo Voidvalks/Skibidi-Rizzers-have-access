@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubik's Cube Solver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .header { background-color: #2d4a35; color: white; }
+        .header a:hover { text-decoration: underline; }
+        .social-icon { width: 24px; height: 24px; margin-right: 8px; }
+        .about-section { background-color: #f9f9f9; padding: 20px; margin-top: 20px; }
+        .cube-face { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+        .cube-square { width: 50px; height: 50px; background-color: gray; }
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-900">
+    <header class="header p-4 flex justify-between items-center">
+        <div class="text-2xl font-bold">3x3 Rubik's Cube Solver</div>
+        <nav class="flex items-center space-x-6">
+            <a href="#about-us" class="text-white">About Us</a>
+            <a href="https://drive.google.com/file/d/11fv4JCtVQ0u4KBxPS8vuCkqmvwxYxYln/view?usp=drivesdk" target="_blank" class="text-white">Learn Basics</a>
+            <div class="flex items-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="social-icon">
+                <span>+91 73069 62867</span>
+            </div>
+            <a href="https://www.instagram.com/dean44kaze/" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram" class="social-icon">
+            </a>
+        </nav>
+    </header>
+
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold text-center mb-4">Rubik's Cube Solver</h1>
+
+        <!-- Color Selection -->
+        <div class="flex justify-center mb-4">
+            <div class="flex space-x-2">
+                <button class="color-btn bg-yellow-500 w-10 h-10" data-color="yellow"></button>
+                <button class="color-btn bg-white w-10 h-10 border" data-color="white"></button>
+                <button class="color-btn bg-red-500 w-10 h-10" data-color="red"></button>
+                <button class="color-btn bg-green-500 w-10 h-10" data-color="green"></button>
+                <button class="color-btn bg-blue-500 w-10 h-10" data-color="blue"></button>
+                <button class="color-btn bg-orange-500 w-10 h-10" data-color="orange"></button>
+            </div>
+        </div>
+
+        <!-- Cube Faces -->
+        <div class="flex justify-center mb-4">
+            <div class="grid grid-cols-4 gap-2">
+                <div></div>
+                <div class="cube-face" id="up"></div>
+                <div></div>
+                <div></div>
+
+                <div class="cube-face" id="left"></div>
+                <div class="cube-face" id="front"></div>
+                <div class="cube-face" id="right"></div>
+                <div class="cube-face" id="back"></div>
+
+                <div></div>
+                <div class="cube-face" id="down"></div>
+                <div></div>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex justify-center space-x-4">
+            <button id="scrambleBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Scramble</button>
+            <button id="solveBtn" class="bg-green-500 text-white px-4 py-2 rounded">Solve</button>
+        </div>
+    </div>
+
+    <script>
+        const colors = {
+            yellow: 'bg-yellow-500',
+            white: 'bg-white',
+            red: 'bg-red-500',
+            green: 'bg-green-500',
+            blue: 'bg-blue-500',
+            orange: 'bg-orange-500',
+        };
+
+        const fixedCenters = {
+            up: 'yellow',
+            down: 'white',
+            left: 'green',
+            front: 'orange',
+            right: 'blue',
+            back: 'red'
+        };
+
+        let selectedColor = 'yellow';
+
+        document.querySelectorAll('.color-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                selectedColor = button.getAttribute('data-color');
+            });
+        });
+
+        const faces = ['up', 'down', 'left', 'right', 'front', 'back'];
+
+        faces.forEach(face => {
+            const faceDiv = document.getElementById(face);
+            for (let i = 0; i < 9; i++) {
+                const square = document.createElement('div');
+                square.classList.add('cube-square');
+
+                if (i === 4) {
+                    square.classList.add(colors[fixedCenters[face]]);
+                    square.dataset.fixed = "true"; 
+                }
+
+                square.addEventListener('click', function () {
+                    if (!this.dataset.fixed) { 
+                        this.className = `cube-square ${colors[selectedColor]}`;
+                    }
+                });
+
+                faceDiv.appendChild(square);
+            }
+        });
+
+        function getRandomMove() {
+            const moves = ['U', 'D', 'L', 'R', 'F', 'B'];
+            const modifiers = ["", "'", "2"];
+            return moves[Math.floor(Math.random() * 6)] + modifiers[Math.floor(Math.random() * 3)];
+        }
+
+        function scrambleCube() {
+            let scrambleMoves = [];
+            for (let i = 0; i < 20; i++) {
+                scrambleMoves.push(getRandomMove());
+            }
+            console.log("Scramble Moves:", scrambleMoves.join(" "));
+
+            faces.forEach(face => {
+                const squares = document.getElementById(face).children;
+                let faceColors = Object.keys(colors);
+                faceColors.splice(faceColors.indexOf(fixedCenters[face]), 1);
+
+                Array.from(squares).forEach((square, index) => {
+                    if (index !== 4) {
+                        let randomColor = faceColors[Math.floor(Math.random() * faceColors.length)];
+                        square.className = `cube-square ${colors[randomColor]}`;
+                    }
+                });
+            });
+        }
+
+        function collectInput() {
+            const cubeState = {};
+            faces.forEach(face => {
+                cubeState[face] = Array.from(document.getElementById(face).children).map(sq => 
+                    sq.className.split(' ').find(c => c.startsWith('bg-')).replace('bg-', '')
+                );
+            });
+            return cubeState;
+        }
+
+        function solveCube() {
+            const cubeState = collectInput();
+            console.log('Cube State:', cubeState);
+            alert('Cube state logged to console. You can integrate solving logic here.');
+        }
+
+        document.getElementById('scrambleBtn').addEventListener('click', scrambleCube);
+        document.getElementById('solveBtn').addEventListener('click', solveCube);
+    </script>
+</body>
+
+</html>
